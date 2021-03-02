@@ -1,7 +1,6 @@
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
@@ -11,6 +10,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.generic import FormView, TemplateView
 
 from .forms import SignupForm, SignInForm
+from .tasks import send_email_account_activation
 from .tokens import account_activation_token
 
 
@@ -34,8 +34,7 @@ class SignupView(FormView):
             }
         )
         to_email = form.cleaned_data.get('email')
-        email = EmailMessage(mail_subject, message, to=[to_email])
-        email.send()
+        send_email_account_activation(to_email, message)
         return HttpResponseRedirect(reverse('accounts:activation_info'))
 
 
@@ -87,4 +86,4 @@ class ActivationDoneView(TemplateView):
 
 
 class InvalidLinkView(TemplateView):
-    template_name = 'accounts/ivalid_link.html'
+    template_name = 'accounts/invalid_link.html'
