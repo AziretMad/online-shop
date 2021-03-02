@@ -1,19 +1,20 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.views.generic import CreateView
+from django.views.generic import FormView, TemplateView
 
-from .forms import SignupForm
+from .forms import SignupForm, SignInForm
 from .tokens import account_activation_token
 
 
-class SignupView(CreateView):
-    model = User
+class SignupView(FormView):
     form_class = SignupForm
     template_name = 'accounts/signup.html'
 
@@ -35,9 +36,7 @@ class SignupView(CreateView):
         to_email = form.cleaned_data.get('email')
         email = EmailMessage(mail_subject, message, to=[to_email])
         email.send()
-        return HttpResponse(
-            'Пожалуйста, подтвердите ваш почту чтобы закончить регистрацию'
-        )
+        return HttpResponseRedirect(reverse('accounts:activation_info'))
 
 
 def activate(request, uidb64, token):
@@ -50,9 +49,42 @@ def activate(request, uidb64, token):
         user.is_active = True
         user.save()
         login(request, user)
-        return HttpResponse(
-            'Спасибо, что подтвердили вашу почту. '
-            'Теперь вы можете войти в ваш аккаунт'
-        )
+        return HttpResponseRedirect(reverse('accounts:activation_done'))
     else:
         return HttpResponse('Сылка для подтверждения не рабочая!')
+
+
+class SignInView(FormView):
+    form_class = SignInForm
+    template_name = 'accounts/signin.html'
+
+    def form_valid(self, form):
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        user = authenticate(username=username, password=password)
+        if user:
+            if user.is_active:
+                login(self.request, user)
+                return HttpResponseRedirect(reverse('/:index'))
+            else:
+                return HttpResponseRedirect(
+                    reverse('accounts:activation_info')
+                )
+        return HttpResponseRedirect(reverse('accounts:activation_info'))
+
+
+def _logout(request):
+    logout(request)
+    return redirect("/:index")
+
+
+class ActivationInfoView(TemplateView):
+    template_name = 'accounts/activation_info.html'
+
+
+class ActivationDoneView(TemplateView):
+    template_name = 'accounts/activation_done.html'
+
+
+class InvalidLinkView(TemplateView):
+    template_name = 'accounts/ivalid_link.html'
