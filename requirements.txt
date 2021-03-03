@@ -7,3 +7,4 @@ sqlparse==0.4.1
 six==1.15.0
 huey==2.3.0
 redis==3.5.3
+django-crispy-forms==1.11.1

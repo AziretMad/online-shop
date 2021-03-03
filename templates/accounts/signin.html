@@ -18,7 +18,8 @@
                     {% endfor %}
                 </p>
             {% endfor %}
-            <button type="submit" class="btn btn-primary mt-3">Войти</button>
+            <button type="submit" class="btn btn-primary mt-1 mb-3">Войти</button>
         </form>
+        <a href="{% url 'accounts:password_reset' %}">Забыли пароль?</a>
     </div>
 {% endblock %}

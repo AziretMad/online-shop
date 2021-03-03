@@ -1,7 +1,10 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordResetForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.template.loader import render_to_string
+
+from .tasks import send_email_password_reset
 
 
 class SignupForm(UserCreationForm):
@@ -57,3 +60,17 @@ class SignInForm(forms.Form):
                 "Логин или пароль введен неправильно."
             )
         return data
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    def send_mail(
+        self,
+        subject_template_name,
+        email_template_name,
+        context,
+        from_email,
+        to_email,
+        html_email_template_name=None,
+    ):
+        message = render_to_string(email_template_name, context)
+        send_email_password_reset(to_email, message)

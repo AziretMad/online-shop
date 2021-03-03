@@ -1,15 +1,18 @@
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
+from django.contrib.auth.views import (
+    PasswordResetView, PasswordContextMixin, PasswordResetConfirmView
+)
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.generic import FormView, TemplateView
 
-from .forms import SignupForm, SignInForm
+from .forms import SignupForm, SignInForm, CustomPasswordResetForm
 from .tasks import send_email_account_activation
 from .tokens import account_activation_token
 
