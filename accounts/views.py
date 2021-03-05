@@ -1,18 +1,15 @@
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
-from django.contrib.auth.views import (
-    PasswordResetView, PasswordContextMixin, PasswordResetConfirmView
-)
 from django.contrib.sites.shortcuts import get_current_site
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, UpdateView
 
-from .forms import SignupForm, SignInForm, CustomPasswordResetForm
+from .forms import SignupForm, SignInForm, UpdateAccountForm
 from .tasks import send_email_account_activation
 from .tokens import account_activation_token
 
@@ -90,3 +87,33 @@ class ActivationDoneView(TemplateView):
 
 class InvalidLinkView(TemplateView):
     template_name = 'accounts/invalid_link.html'
+
+
+class UpdateAccountView(UpdateView):
+    model = User
+    form_class = UpdateAccountForm
+    template_name = 'accounts/update_account_form.html'
+
+    def form_valid(self, form):
+        user = self.model.objects.get(id=self.kwargs.get('pk'))
+        user.username = form.cleaned_data.get('username')
+        user.first_name = form.cleaned_data.get('first_name')
+        user.last_name = form.cleaned_data.get('last_name')
+        user.save(update_fields=['username', 'first_name', 'last_name'])
+        return JsonResponse(
+            {
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name
+            },
+            status=201,
+        )
+
+    def form_invalid(self, form):
+        print(form.cleaned_data.get("username"))
+        return JsonResponse(
+            {
+                'message': form.errors,
+            },
+            status=400
+        )

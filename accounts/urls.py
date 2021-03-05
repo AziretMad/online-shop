@@ -1,7 +1,8 @@
-from django.urls import re_path, path, reverse_lazy
 from django.contrib.auth import views as auth_views
+from django.urls import re_path, path, reverse_lazy
+
 from . import views
-from . forms import CustomPasswordResetForm
+from .forms import CustomPasswordResetForm
 
 app_name = 'accounts'
 urlpatterns = [
@@ -49,20 +50,25 @@ urlpatterns = [
         name='password_reset'
     ),
     path(
-        "password-reset/done/",
+        'password-reset/done/',
         auth_views.PasswordResetDoneView.as_view(),
-        name="password_reset_done",
+        name='password_reset_done',
     ),
     re_path(
-        r"^password-reset-confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,32})/$",
+        r'^password-reset-confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,32})/$',
         auth_views.PasswordResetConfirmView.as_view(
             success_url=reverse_lazy('accounts:password_reset_complete')
         ),
-        name="password_reset_confirm",
+        name='password_reset_confirm',
     ),
     path(
-        "password-reset-complete/",
+        'password-reset-complete/',
         auth_views.PasswordResetCompleteView.as_view(),
-        name="password_reset_complete",
+        name='password_reset_complete',
+    ),
+    path(
+        'update-account/<int:pk>/',
+        views.UpdateAccountView.as_view(),
+        name='update_account',
     ),
 ]

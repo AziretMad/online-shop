@@ -1,5 +1,9 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, PasswordResetForm
+from django.contrib.auth.forms import (
+    UserCreationForm,
+    PasswordResetForm,
+    UsernameField
+)
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.template.loader import render_to_string
@@ -74,3 +78,17 @@ class CustomPasswordResetForm(PasswordResetForm):
     ):
         message = render_to_string(email_template_name, context)
         send_email_password_reset(to_email, message)
+
+
+class UpdateAccountForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("username", "first_name", "last_name")
+        field_classes = {'username': UsernameField}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self._meta.model.USERNAME_FIELD in self.fields:
+            self.fields[self._meta.model.USERNAME_FIELD].widget.attrs[
+                'autofocus'] = True
+

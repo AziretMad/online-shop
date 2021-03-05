@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container mt-5 mb-5" style="text-align: left">
+        <h2 class="mb-3">Профиль</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <p>
+                    {{ field.label_tag }}<br>
+                    {{ field }}
+                <div style="text-align: center">
+                    {% if field.help_text %}
+                        <small style="display: none">{{ field.help_text }}</small>
+                    {% endif %}
+                </div>
+                {% for error in field.errors %}
+                    <p style="color: red">{{ error }}</p>
+                {% endfor %}
+                </p>
+            {% endfor %}
+        </form>
+        <button type="submit" class="btn btn-primary mt-2 mb-2"
+                id="submit-button" onclick="changeProfile()">
+            Изменить профиль
+        </button>
+        <button type="submit" class="btn btn-primary mt-2 mb-2"
+                id="confirm-changes" style="display: none" onclick="saveChanges()">
+            Сохранить изменения
+        </button>
+        <a href="{% url 'accounts:password_reset' %}">Сменить пароль</a>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript">
+        let username = document.getElementById("id_username");
+        let first_name = document.getElementById("id_first_name");
+        let last_name = document.getElementById("id_last_name");
+        let button = document.getElementById("submit-button");
+        let button2 = document.getElementById("confirm-changes")
+
+        document.addEventListener("DOMContentLoaded", function (event) {
+            makeReadOnly()
+        });
+
+        function changeProfile() {
+            username.readOnly = false;
+            username.style.backgroundColor = "white";
+            first_name.readOnly = false;
+            first_name.style.backgroundColor = "white";
+            last_name.readOnly = false;
+            last_name.style.backgroundColor = "white";
+            if (button.style.display === "none") {
+                button.style.display = "block";
+            } else {
+                button.style.display = "none";
+            }
+            button2.style.display = "block"
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function saveChanges() {
+            const formData = new FormData();
+            formData.append("username", username.value)
+            formData.append("first_name", first_name.value)
+            formData.append("last_name", last_name.value)
+            let user_id = {{ user.pk }};
+            const csrf_token = getCookie('csrftoken');
+            let url = "/accounts/update-account/" + user_id + "/"
+            let response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrf_token
+                },
+                body: formData
+            })
+            let result = await response.json();
+            processResult(result)
+        }
+
+        function processResult(result) {
+            let profileLink = document.getElementById("profile-link");
+            profileLink.innerText = result.username;
+            username.value = result.username;
+            first_name.value = result.first_name;
+            last_name.value = result.last_name;
+            makeReadOnly()
+            button.style.display = "block";
+            button2.style.display = "none";
+        }
+
+        function makeReadOnly() {
+            username.readOnly = true;
+            username.style.backgroundColor = "#DCDCDC";
+            last_name.readOnly = true;
+            first_name.style.backgroundColor = "#DCDCDC";
+            first_name.readOnly = true;
+            last_name.style.backgroundColor = "#DCDCDC";
+        }
+    </script>
+{% endblock %}"

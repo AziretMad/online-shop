@@ -64,7 +64,8 @@
                     {% if user.is_authenticated %}
                         <li class="nav-item">
                             <a class="btn btn-primary me-1" aria-current="page"
-                               href="#">{{ user.username }}</a>
+                               href="{% url 'accounts:update_account' user.pk %}"
+                               id="profile-link">{{ user.username }}</a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-primary" aria-current="page"
@@ -99,5 +100,6 @@
                 started guide</a>.</p>
     </div>
 </footer>
+{% block script %}{% endblock %}
 </body>
 </html>
