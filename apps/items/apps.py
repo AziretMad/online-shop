@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class ItemsConfig(AppConfig):
-    name = 'items'
+    name = 'apps.items'
+    verbose_name = 'Товары'
