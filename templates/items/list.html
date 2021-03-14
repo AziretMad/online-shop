@@ -25,6 +25,14 @@
                          aria-labelledby="flush-headingOne"
                          data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body">
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                {% for category in parent_category.category_set.all %}
+                                    <li class="nav-item">
+                                        <a class="nav-link active"
+                                           href="{% url "/:category" category.slug %}">{{ category.name }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -84,38 +92,40 @@
             </div>
         </div>
         <div class="container">
-            {% if is_paginated %}
+            <nav aria-label="...">
                 <ul class="pagination">
                     {% if page_obj.has_previous %}
-                        <li>
-                            <a href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" tabindex="-1"
+                               aria-disabled="true">&laquo;</a>
                         </li>
                     {% else %}
-                        <li class="disabled"><span>&laquo;</span></li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1"
+                               aria-disabled="true">&laquo;</a>
+                        </li>
                     {% endif %}
                     {% for i in paginator.page_range %}
                         {% if page_obj.number == i %}
-                            <li class="active"><span>{{ i }} <span
-                                    class="sr-only">(current)</span></span>
+                            <li class="page-item active" aria-current="page">
+                                <a class="page-link" href="#">{{ i }}</a>
                             </li>
                         {% else %}
-                            <li><a href="?page={{ i }}">{{ i }}</a></li>
+                            <li class="page-item"><a class="page-link"
+                                                     href="?page={{ i }}">{{ i }}</a></li>
                         {% endif %}
                     {% endfor %}
                     {% if page_obj.has_next %}
-                        <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
                         </li>
                     {% else %}
-                        <li class="disabled"><span>&raquo;</span></li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">&raquo;</a>
+                        </li>
                     {% endif %}
                 </ul>
-            {% endif %}
+            </nav>
         </div>
     </main>
-{% endblock %}
-{% block script %}
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function (event) {
-        });
-    </script>
 {% endblock %}

@@ -16,7 +16,7 @@ class ItemList(ListView):
         queryset = super(ItemList, self).get_queryset()
         slug = self.kwargs.get('slug')
         if slug:
-            queryset.filter(category__slug=slug)
+            queryset = queryset.filter(category__slug=slug)
         return queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
