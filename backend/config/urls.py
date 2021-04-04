@@ -17,13 +17,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
-from config import settings
+from backend.config import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('apps.items.urls', namespace='/')),
-    path('items/', include('apps.items.urls', namespace='items')),
-    path('accounts/', include('apps.accounts.urls', namespace='accounts')),
+    path('', include('backend.apps.items.urls', namespace='/')),
+    path('items/', include('backend.apps.items.urls', namespace='items')),
+    path('accounts/', include('backend.apps.accounts.urls', namespace='accounts')),
 ]
 
 if settings.DEBUG:

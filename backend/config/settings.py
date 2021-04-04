@@ -19,7 +19,6 @@ import huey
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -34,7 +33,6 @@ DEBUG = os.environ.get('DEBUG', default=True)
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -46,8 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'huey.contrib.djhuey',
     'crispy_forms',
-    'apps.accounts.apps.AccountsConfig',
-    'apps.items.apps.ItemsConfig',
+    'backend.apps.accounts.apps.AccountsConfig',
+    'backend.apps.items.apps.ItemsConfig',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -60,7 +59,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = 'backend.config.urls'
 
 TEMPLATES = [
     {
@@ -78,8 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
-
+WSGI_APPLICATION = 'backend.config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -101,7 +99,6 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = os.environ.get('EMAIL_PORT')
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
@@ -120,7 +117,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -134,7 +130,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
@@ -146,6 +141,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+REDIS_URL = os.environ.get("REDIS_URL", default="redis://redis:6379/0")
 
 # https://huey.readthedocs.io/en/latest/django.html
 HUEY = {
@@ -154,18 +150,15 @@ HUEY = {
     'results': True,  # Store return values of tasks.
     'store_none': False,  # If a task returns None, do not save to results.
     'immediate': DEBUG,  # If DEBUG=True, run synchronously.
-    'utc': False,  # Use UTC for all times internally.
+    'utc': True,  # Use UTC for all times internally.
     'blocking': True,  # Perform blocking pop rather than poll Redis.
     'connection': {
-        'host': 'localhost',
-        'port': 6379,
-        'db': 0,
         'connection_pool': None,  # Definitely you should use pooling!
         # ... tons of other options, see redis-py for details.
 
         # huey-specific connection parameters.
         'read_timeout': 1,  # If not polling (blocking pop), use timeout.
-        'url': None,  # Allow Redis config via a DSN.
+        'url': REDIS_URL,  # Allow Redis config via a DSN.
     },
     'consumer': {
         'workers': 1,
@@ -174,7 +167,7 @@ HUEY = {
         'backoff': 1.15,  # Exponential backoff using this rate, -b.
         'max_delay': 10.0,  # Max possible polling interval, -m.
         'scheduler_interval': 1,  # Check schedule every second, -s.
-        'periodic': False,  # Enable crontab feature.
+        'periodic': True,  # Enable crontab feature.
         'check_worker_health': True,  # Enable worker health checks.
         'health_check_interval': 1,  # Check worker health every second.
     },
